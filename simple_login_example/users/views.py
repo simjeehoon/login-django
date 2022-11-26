@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpRequest
 
 import json
@@ -11,8 +11,13 @@ def login(request: HttpRequest):
         'password': 'django'
     }
 
+    context = {
+        'method': request.method,
+        'is_valid': True
+    }
+
     if request.method == 'GET':
-        return render(request, 'users/login.html')
+        return render(request, 'users/login.html', context)
 
     elif request.method == 'POST':
         username = request.POST.get('username')
@@ -20,18 +25,26 @@ def login(request: HttpRequest):
         
         # 유저가 아이디나 비밀번호를 입력하는 상황에서 실수롤 정보를 다 기입하지 않은 상황
         if username == '':
-            return HttpResponse('유저 아이디를 입력해주세요')
+            context['is_valid'] = False
         if password == '':
-            return HttpResponse('유저 비밀번호를 입력해주세요')
+            context['is_valid'] = False
 
         if username != user_data['username']:
-            return HttpResponse('유저 아이디가 올바르지 않습니다.')
+            context['is_valid'] = False
         if password != user_data['password']:
-            return HttpResponse('유저 비밀번호가 올바르지 않습니다.')
+            context['is_valid'] = False
         
-        return HttpResponse('로그인 성공!')
+        if context['is_valid']:
+            responce = redirect('pages:index')
+            
+            responce.set_cookie('username', user_data['username'])
+            responce.set_cookie('password', user_data['password'])
+            responce.set_cookie('is_login', True)
+            
+            return responce
 
-    
+        return render(request, 'users/login.html', context)
+
 
 def login_detail(request: HttpRequest, id):
     return HttpResponse(f"user id는 {id}입니다.")

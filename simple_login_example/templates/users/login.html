@@ -7,6 +7,7 @@
     <title>로그인 페이지</title>
 </head>
 <body>
+    {% if method == 'GET' %}
     <form method="POST">{% csrf_token %}
         <label for="username">아이디</label>
         <input type="text" name="username" id="username">
@@ -14,5 +15,12 @@
         <input type="text" name="password" id="password">
         <input type="submit">
     </form>
+    {% else %}
+        {% if not is_valid %}
+            <h1 style="color: red">로그인에 실패했습니다 ㅠㅠ</h1>
+        {% else %}
+            <h1 style="color: blue">로그인 성공!!</h1>
+        {% endif %}
+    {% endif %}
 </body>
 </html>
